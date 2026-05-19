@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@400;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -8,6 +8,41 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 m-0 p-0 font-sans antialiased overflow-x-hidden;
+    @apply bg-slate-50/50 text-slate-900 m-0 p-0 font-anek antialiased overflow-x-hidden;
   }
+}
+
+/* Custom premium styling and animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Background grid pattern */
+.bg-grid-pattern {
+  background-size: 24px 24px;
+  background-image: radial-gradient(circle, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
 }

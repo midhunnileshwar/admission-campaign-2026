@@ -1,7 +1,6 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import Cropper from 'react-easy-crop'
 import { getCroppedImg } from '../utils/canvasUtils'
-import { unicodeToLegacy } from '../utils/unicodeToLegacy'
 import { Download, RefreshCcw } from 'lucide-react'
 
 const PosterEditor = ({ imageSrc, templateSrc, onReset }) => {
@@ -15,8 +14,68 @@ const PosterEditor = ({ imageSrc, templateSrc, onReset }) => {
   const [studentName, setStudentName] = useState('')
   const [fontSize, setFontSize] = useState(60)
   const [nameX, setNameX] = useState(768)
-  const [nameY, setNameY] = useState(1420) // near the bottom of the child photo
-  const [textColor, setTextColor] = useState('#000000')
+  const [nameY, setNameY] = useState(1700) // Positioned nicely below the photo hole by default
+  const [textColor, setTextColor] = useState('#c20000') // Vibrant red color for maximum design appeal
+
+  // Drag and drop positioning state & handlers
+  const previewRef = useRef(null)
+  const [isDragging, setIsDragging] = useState(false)
+
+  const handleDrag = useCallback((clientX, clientY) => {
+    if (!previewRef.current) return
+    const rect = previewRef.current.getBoundingClientRect()
+    
+    // Convert current cursor coordinates to percentage coordinates relative to preview container
+    let pctX = (clientX - rect.left) / rect.width
+    let pctY = (clientY - rect.top) / rect.height
+    
+    // Clamp to ensure the name text stays within reasonable boundaries of the poster template
+    pctX = Math.max(0.05, Math.min(0.95, pctX))
+    pctY = Math.max(0.05, Math.min(0.95, pctY))
+    
+    // Map to canvas coordinate grid (1536 x 2572)
+    setNameX(Math.round(pctX * 1536))
+    setNameY(Math.round(pctY * 2572))
+  }, [])
+
+  const handleStart = useCallback((e) => {
+    setIsDragging(true)
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    handleDrag(clientX, clientY)
+  }, [handleDrag])
+
+  const handleMove = useCallback((e) => {
+    if (!isDragging) return
+    // Prevent default touch behaviors like scrolling when adjusting name position on mobile
+    if (e.cancelable) {
+      e.preventDefault()
+    }
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY
+    handleDrag(clientX, clientY)
+  }, [isDragging, handleDrag])
+
+  const handleEnd = useCallback(() => {
+    setIsDragging(false)
+  }, [])
+
+  // Listen globally for mouse and touch interactions during drag operations
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMove)
+      window.addEventListener('mouseup', handleEnd)
+      window.addEventListener('touchmove', handleMove, { passive: false })
+      window.addEventListener('touchend', handleEnd)
+      
+      return () => {
+        window.removeEventListener('mousemove', handleMove)
+        window.removeEventListener('mouseup', handleEnd)
+        window.removeEventListener('touchmove', handleMove)
+        window.removeEventListener('touchend', handleEnd)
+      }
+    }
+  }, [isDragging, handleMove, handleEnd])
 
   const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels)
@@ -57,6 +116,7 @@ const PosterEditor = ({ imageSrc, templateSrc, onReset }) => {
       
       {/* Interactive Poster Area */}
       <div 
+        ref={previewRef}
         className="relative w-full overflow-hidden shadow-2xl rounded-2xl bg-white border border-slate-200"
         style={{ 
           aspectRatio: '1536/2572',
@@ -67,19 +127,19 @@ const PosterEditor = ({ imageSrc, templateSrc, onReset }) => {
           Cropper Container 
           Matches the exact size and position of the transparent hole in Base.png:
           Hole: x=319, y=680, width=899, height=796 (on a 1536x2572 canvas)
-          Percentages: 
-          left: 319/1536 = 20.7682%
-          top: 680/2572 = 26.4386%
-          width: 899/1536 = 58.5286%
-          height: 796/2572 = 30.9487%
+          Percentages styled via cqw relative to width of parent for exact layout ratio on all screens:
+          left: 319 / 1536 = 20.7682cqw
+          top: 680 / 1536 = 44.2708cqw
+          width: 899 / 1536 = 58.5286cqw
+          height: 796 / 1536 = 51.8229cqw
         */}
         <div 
           className="absolute"
           style={{
-            left: '20.7682%',
-            top: '26.4386%',
-            width: '58.5286%',
-            height: '30.9487%',
+            left: '20.7682cqw',
+            top: '44.2708cqw',
+            width: '58.5286cqw',
+            height: '51.8229cqw',
           }}
         >
           <Cropper
@@ -108,20 +168,29 @@ const PosterEditor = ({ imageSrc, templateSrc, onReset }) => {
         {/* Live Malayalam Name Overlay */}
         {showName && studentName && (
           <div
-            className="absolute select-none pointer-events-none text-center font-bold"
+            className={`absolute select-none text-center font-bold transition-all duration-75 rounded-md p-1 ${
+              isDragging 
+                ? 'ring-2 ring-blue-500 ring-dashed bg-blue-50/20 shadow-md scale-105' 
+                : 'hover:ring-2 hover:ring-slate-400 hover:ring-dashed'
+            }`}
+            onMouseDown={handleStart}
+            onTouchStart={handleStart}
             style={{
               left: `${(nameX / 1536) * 100}%`,
               top: `${(nameY / 2572) * 100}%`,
               transform: 'translate(-50%, -50%)',
               fontSize: `${(fontSize / 1536) * 100}cqw`, // scales dynamically with width
               color: textColor,
-              fontFamily: "'ML-KV-Shamitha-H', sans-serif",
+              fontFamily: "'Anek Malayalam', sans-serif",
               whiteSpace: 'nowrap',
               WebkitTextStroke: `${(fontSize / 1536) * 100 * 0.15}cqw #ffffff`, // proportional outline
               paintOrder: 'stroke fill',
+              cursor: 'move',
+              touchAction: 'none',
+              pointerEvents: 'auto',
             }}
           >
-            {unicodeToLegacy(studentName)}
+            {studentName}
           </div>
         )}
       </div>
@@ -160,8 +229,8 @@ const PosterEditor = ({ imageSrc, templateSrc, onReset }) => {
                 placeholder="അഭിമന്യു വി."
                 className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 text-slate-800 bg-slate-50"
               />
-              <p className="text-xs text-slate-400">
-                കുട്ടിയുടെ പേര് മലയാളത്തിൽ ടൈപ്പ് ചെയ്യുക. അക്ഷരങ്ങൾ തനിയെ കസ്റ്റം ഫോണ്ടിലേക്ക് മാറിക്കൊള്ളും.
+              <p className="text-xs text-slate-500">
+                കുട്ടിയുടെ പേര് മലയാളത്തിൽ ടൈപ്പ് ചെയ്യുക. പേരിന്റെ സ്ഥാനം മാറ്റാൻ പോസ്റ്ററിന് മുകളിലുള്ള പേരിൽ വിരൽ തൊട്ട് വലിച്ചിടുക!
               </p>
             </div>
 
@@ -209,40 +278,6 @@ const PosterEditor = ({ imageSrc, templateSrc, onReset }) => {
                     ))}
                   </div>
                 </div>
-              </div>
-
-              {/* Position X */}
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-slate-600 flex justify-between">
-                  <span>ഇടത് / വലത് വശങ്ങളിലേക്ക് മാറ്റുക (X)</span>
-                  <span className="text-blue-600">{nameX}</span>
-                </label>
-                <input
-                  type="range"
-                  value={nameX}
-                  min={100}
-                  max={1436}
-                  step={5}
-                  onChange={(e) => setNameX(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                />
-              </div>
-
-              {/* Position Y */}
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-slate-600 flex justify-between">
-                  <span>മുകളിലേക്കോ താഴേക്കോ മാറ്റുക (Y)</span>
-                  <span className="text-blue-600">{nameY}</span>
-                </label>
-                <input
-                  type="range"
-                  value={nameY}
-                  min={500}
-                  max={2200}
-                  step={5}
-                  onChange={(e) => setNameY(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                />
               </div>
             </div>
           </>

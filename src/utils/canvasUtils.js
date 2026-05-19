@@ -1,5 +1,3 @@
-import { unicodeToLegacy } from './unicodeToLegacy'
-
 export const createImage = (url) =>
   new Promise((resolve, reject) => {
     const image = new Image()
@@ -53,24 +51,26 @@ export async function getCroppedImg(
 
   // 3. Draw the student's name in Malayalam on top of the template
   if (nameConfig.showName && nameConfig.studentName) {
-    const asciiName = unicodeToLegacy(nameConfig.studentName)
+    try {
+      await document.fonts.load(`${nameConfig.fontSize}px 'Anek Malayalam'`)
+    } catch (e) {
+      console.warn('Could not load Google Font Anek Malayalam, falling back:', e)
+    }
     
-    // Ensure font is ready in browser before drawing to canvas
-    // Wait, the font family used is 'ML-KV-Shamitha-H'
-    ctx.font = `${nameConfig.fontSize}px 'ML-KV-Shamitha-H'`
+    ctx.font = `bold ${nameConfig.fontSize}px 'Anek Malayalam', sans-serif`
     ctx.fillStyle = nameConfig.textColor
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     
     // Draw white stroke outline first for excellent readability on any background
     ctx.strokeStyle = '#ffffff'
-    ctx.lineWidth = nameConfig.fontSize * 0.15
+    ctx.lineWidth = Math.max(3, nameConfig.fontSize * 0.15)
     ctx.lineJoin = 'round'
     ctx.miterLimit = 2
-    ctx.strokeText(asciiName, nameConfig.nameX, nameConfig.nameY)
+    ctx.strokeText(nameConfig.studentName, nameConfig.nameX, nameConfig.nameY)
     
     // Draw solid filled text
-    ctx.fillText(asciiName, nameConfig.nameX, nameConfig.nameY)
+    ctx.fillText(nameConfig.studentName, nameConfig.nameX, nameConfig.nameY)
   }
 
   // As a blob

@@ -1,12 +1,9 @@
-@font-face {
-  font-family: 'ML-KV-Shamitha-H';
-  src: local('ML-KV-Shamitha-H'), local('ML-KV-Shamitha'), url('/ML-KV-Shamitha-H.ttf') format('truetype');
-}
-
+@import url('https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@400;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", "Outfit", system-ui, sans-serif;
+  --font-anek: "Anek Malayalam", sans-serif;
 }
 
 @layer base {

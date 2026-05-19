@@ -36,7 +36,7 @@ function App() {
         <div className="max-w-screen-md mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center">
             <img 
-              src="/School_Logo-removebg-preview.png" 
+              src="School_Logo-removebg-preview.png" 
               alt="School Logo" 
               className="h-12 w-auto object-contain mr-3 drop-shadow-sm"
             />
@@ -61,7 +61,7 @@ function App() {
             {/* Branding Welcome Area */}
             <div className="flex flex-col items-center text-center space-y-4 max-w-lg mx-auto">
               <img 
-                src="/School_Logo-removebg-preview.png" 
+                src="School_Logo-removebg-preview.png" 
                 alt="School Logo" 
                 className="w-28 h-28 object-contain drop-shadow-lg animate-float"
               />
@@ -150,7 +150,7 @@ function App() {
               className="block relative"
             >
               <img 
-                src="/Untitled-1@3x.png" 
+                src="Untitled-1@3x.png" 
                 alt="പരസ്യം" 
                 className="w-full h-auto object-cover group-hover:scale-[1.01] transition-transform duration-300"
               />

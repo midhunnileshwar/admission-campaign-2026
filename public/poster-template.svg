@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <mask id="hole">
+      <rect width="1080" height="1080" fill="white" />
+      <rect x="140" y="240" width="800" height="700" rx="40" fill="black" />
+    </mask>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1080" height="1080" fill="url(#bg)" mask="url(#hole)" />
+
+  <!-- Logo Placeholder / Header -->
+  <text x="540" y="110" font-family="Arial, sans-serif" font-size="50" font-weight="bold" fill="white" text-anchor="middle">My child got admission in</text>
+  <text x="540" y="180" font-family="Arial, sans-serif" font-size="65" font-weight="900" fill="#facc15" text-anchor="middle">St. Ann's A.U.P.S Nileshwar</text>
+  
+  <!-- Footer -->
+  <text x="540" y="1020" font-family="Arial, sans-serif" font-size="40" font-weight="bold" fill="white" text-anchor="middle">#ProudParent #StAnnsNileshwar</text>
+</svg>

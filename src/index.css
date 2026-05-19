@@ -1,0 +1,16 @@
+@font-face {
+  font-family: 'ML-KV-Shamitha-H';
+  src: local('ML-KV-Shamitha-H'), local('ML-KV-Shamitha'), url('/ML-KV-Shamitha-H.ttf') format('truetype');
+}
+
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Outfit", system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 m-0 p-0 font-sans antialiased overflow-x-hidden;
+  }
+}
